@@ -16,7 +16,7 @@ function Item(item_name, item_wear, market_id, float, pattern_seed, buy_link, pr
 }
 
 (async () => {
-  const pathToExtension = '/Users/maxwellmegale/Library/Application Support/Google/Chrome/Profile 1/Extensions/jjicbefpemnphinccgikpdaagjebbnhg/4.3.1_0';
+  const pathToExtension = '/Users/[user]/Library/Application Support/Google/Chrome/Profile 1/Extensions/jjicbefpemnphinccgikpdaagjebbnhg/4.3.1_0';
   const userDataDir = '/tmp';
   const browserContext = await chromium.launchPersistentContext(userDataDir, {
     headless: false,
