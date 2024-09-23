@@ -28,6 +28,7 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
   
   
   const page = await browserContext.newPage();
+  //Stops page from loading png or jpeg images. This will reduce load time;
   await page.route(/(png|jpeg)$/, route => route.abort());
   await page.goto(skinUrl);
   await page.waitForLoadState('networkidle');
