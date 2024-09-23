@@ -6,3 +6,4 @@ Node.JS application using Playwright to scrape data from steam community market 
 
 Scrapes listed items information such as Item Name, Wear Rating, Float Value, Pattern Seed, MarketID, and link to purchase.
 
+From data collection, do any items have a pattern value matching the target patten?
