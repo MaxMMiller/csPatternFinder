@@ -105,13 +105,19 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
             console.log("current top item price: " + checkPrice[0].replace(/\s+/g, '').replace(/\r?\n|\r/g, ""));
 
             let pageLoaded = false;
+            let numCheckAttempt = 0;
             while (!pageLoaded && currentPage < total_pages){
               await new Promise((resolve) => setTimeout(resolve, 3 * 1000));
+              numCheckAttempt++;
               let checkPrice = await id_info[1].locator('..').locator('..').locator('.market_listing_price_listings_block').locator('.market_listing_price_with_fee').allTextContents();
               if (all_items.at((currentPage-1)*10).price !== checkPrice[0].replace(/\s+/g, '').replace(/\r?\n|\r/g, "")){
                 pageLoaded = true;
               }
+              console.log("Attempt: " + numCheckAttempt);
               console.log("Page Loaded? : " + pageLoaded);
+              if(numCheckAttempt>=5){
+                await page.locator(`#searchResults_btn_next`).click();
+              }
             }
             console.log("next page");
             currentPage++; //indicate that we have moved to next page
@@ -128,6 +134,7 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
 
 
   let numPatFound = 0;
+  
   //sort through all_items, if an item has a pattern value that is desired, add it to an array of only items with the patterns
   let include_pattern = all_items.filter(function (item){
     let isFound = false;
