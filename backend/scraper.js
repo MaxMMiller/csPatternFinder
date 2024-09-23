@@ -55,10 +55,6 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
       let item = new Item();
       num_scraped++
           
-      //Find ID attribute for current item
-      //let id = await id_info[i].getAttribute('id');
-      //item.market_id = id.replace(/[^0-9.]/g,'');
-
       //find price and buy link and assign values to item object
       let buy_info = await id_info[i].locator('..').locator('..').locator('.market_listing_price_listings_block');
       if(buy_info){ // if exists...
@@ -76,7 +72,6 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
           let cs_info_text = cs_info[0].replace(/\s+/g, '').replace(/\r?\n|\r/g, "");
           let split = cs_info_text.split(':');
               
-
           item.float = split[1].replace(/[A-Za-z]/g, "");
           item.pattern_seed = split[2];
 
@@ -102,9 +97,6 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
             await page.waitForLoadState('domcontentloaded');
             
             var checkPrice = await id_info[1].locator('..').locator('..').locator('.market_listing_price_listings_block').locator('.market_listing_price_with_fee').allTextContents();
-            console.log("Previous top item price: " + all_items.at((currentPage-1)*10).price);
-            console.log("current top item price: " + checkPrice[0].replace(/\s+/g, '').replace(/\r?\n|\r/g, ""));
-
             let pageLoaded = false;
             let numCheckAttempt = 0;
             while (!pageLoaded && currentPage < total_pages){
@@ -128,14 +120,10 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
   
   //if an item object is missing a value, exclude it
   let result = all_items.filter(function (item){
-    return item.market_id &&
-      item.float &&
-      item.pattern_seed;
+    return item.price && item.float && item.pattern_seed && item.buy_link;
   });
 
-
   let numPatFound = 0;
-  
   //sort through all_items, if an item has a pattern value that is desired, add it to an array of only items with the patterns
   let include_pattern = all_items.filter(function (item){
     let isFound = false;
@@ -149,8 +137,6 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
     console.log("Pattern Found?: " + isFound); // was desired pattern found? true or false
     return isFound; //if pattern is found, return it to array, if not, exclude it
   });
-
-  
 
   console.log(result);
   console.log(include_pattern);
