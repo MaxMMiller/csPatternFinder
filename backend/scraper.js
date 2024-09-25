@@ -1,8 +1,12 @@
 const { chromium } = require('playwright');
 
-const skinName = "AK-47 | Bloodsport (Minimal Wear)";
-const skinUrl = "https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Bloodsport%20%28Minimal%20Wear%29";
-const desiredPatterns = [379, 609]; //2 pattern seeds from the last page of results form ak bloodsport min wear
+/*const skinName = "P2000 | Granite Marbleized (Minimal Wear)";
+const skinUrl = "https://steamcommunity.com/market/listings/730/P2000%20%7C%20Granite%20Marbleized%20%28Minimal%20Wear%29";
+const desiredPatterns = [125, 128, 235]; //125 - Hamset, 128 - Dog, 235 - Sloth*/
+
+const skinName = "Tec-9 | Phoenix Chalk (Well-Worn)";
+const skinUrl = "https://steamcommunity.com/market/listings/730/Tec-9%20%7C%20Phoenix%20Chalk%20%28Well-Worn%29";
+const desiredPatterns = [71, 685, 214];
 
 
 function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
@@ -16,7 +20,7 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
 
 (async () => {
   //location of CS Float Extension
-  const pathToExtension = '/Users/[userName]/Library/Application Support/Google/Chrome/Profile 1/Extensions/jjicbefpemnphinccgikpdaagjebbnhg/4.3.1_0';
+  const pathToExtension = '/Users/maxwellmegale/Library/Application Support/Google/Chrome/Profile 1/Extensions/jjicbefpemnphinccgikpdaagjebbnhg/4.3.1_0';
   const userDataDir = '/tmp';
   const browserContext = await chromium.launchPersistentContext(userDataDir, {
     headless: false,
@@ -38,7 +42,7 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
   let item_name = await page.locator("#largeiteminfo_item_name").allInnerTexts();
   let item_wear = await page.locator(".item_desc_descriptors").locator(".descriptor").allInnerTexts();
   const total_listings = await page.locator("#searchResults_total").innerText();
-  const total_pages = Math.ceil(total_listings / 10);
+  const total_pages = Math.ceil(total_listings.replace(/[^a-zA-Z0-9]/g, '') / 10);
 
   let all_items = [];
   var num_scraped = 0;
@@ -54,7 +58,7 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
       //create new item object and increase our count of items scraped
       let item = new Item();
       num_scraped++
-          
+
       //find price and buy link and assign values to item object
       let buy_info = await id_info[i].locator('..').locator('..').locator('.market_listing_price_listings_block');
       if(buy_info){ // if exists...
@@ -72,6 +76,7 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
           let cs_info_text = cs_info[0].replace(/\s+/g, '').replace(/\r?\n|\r/g, "");
           let split = cs_info_text.split(':');
               
+
           item.float = split[1].replace(/[A-Za-z]/g, "");
           item.pattern_seed = split[2];
 
@@ -89,39 +94,43 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
       }
 
     } // end of each item for loop
-   
-        
-        //if there is more than 1 page, click next page button and wait for page to load new items
+
         if(total_pages !== 1){
-            await page.locator(`#searchResults_btn_next`).click();
-            await page.waitForLoadState('domcontentloaded');
-            
-            var checkPrice = await id_info[1].locator('..').locator('..').locator('.market_listing_price_listings_block').locator('.market_listing_price_with_fee').allTextContents();
-            let pageLoaded = false;
-            let numCheckAttempt = 0;
-            while (!pageLoaded && currentPage < total_pages){
-              await new Promise((resolve) => setTimeout(resolve, 3 * 1000));
-              numCheckAttempt++;
-              let checkPrice = await id_info[1].locator('..').locator('..').locator('.market_listing_price_listings_block').locator('.market_listing_price_with_fee').allTextContents();
-              if (all_items.at((currentPage-1)*10).price !== checkPrice[0].replace(/\s+/g, '').replace(/\r?\n|\r/g, "")){
-                pageLoaded = true;
-              }
-              console.log("Attempt: " + numCheckAttempt);
-              console.log("Page Loaded? : " + pageLoaded);
-              if(numCheckAttempt>=5){
-                await page.locator(`#searchResults_btn_next`).click();
-              }
+          await page.locator(`#searchResults_btn_next`).click();
+          await page.waitForLoadState('domcontentloaded');
+          
+          let pageLoaded = false;
+          let numCheckAttempt = 0;
+
+          while (!pageLoaded && currentPage < total_pages){ //If the page has not loaded, and the current page is not the last page, attempts to go to next page.
+            await new Promise((resolve) => setTimeout(resolve, 3 * 1000));
+            numCheckAttempt++;
+            let checkLink = await id_info[1].locator('..').locator('..').locator('.market_listing_price_listings_block').locator('.item_market_action_button').getAttribute('href');
+            //Compares buy link from top item on last page scanned with the top item currently on the page
+            //if they are different, that means it loaded the next set of items and we can continue scraping
+            if (all_items.at((currentPage-1)*10).buy_link !== checkLink){
+              pageLoaded = true;
             }
-            console.log("next page");
-            currentPage++; //indicate that we have moved to next page
-        }
+            //If page has not loaded, continue looping until loaded
+            console.log("Attempt: " + numCheckAttempt);
+            console.log("Page Loaded? : " + pageLoaded);
+            if(numCheckAttempt>5){
+              await page.locator(`#searchResults_btn_next`).click();
+              console.log("clicked next page btn");
+              numCheckAttempt = 0;
+            }
+          }
+          console.log("next page");
+          currentPage++; //indicate that we have moved to next page
+      }
     } // end of each page for loop
 
   
   //if an item object is missing a value, exclude it
   let result = all_items.filter(function (item){
-    return item.price && item.float && item.pattern_seed && item.buy_link;
+    return item.float && item.pattern_seed && item.buy_link && item.price;
   });
+
 
   let numPatFound = 0;
   //sort through all_items, if an item has a pattern value that is desired, add it to an array of only items with the patterns
@@ -137,6 +146,8 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
     console.log("Pattern Found?: " + isFound); // was desired pattern found? true or false
     return isFound; //if pattern is found, return it to array, if not, exclude it
   });
+
+  
 
   console.log(result);
   console.log(include_pattern);
