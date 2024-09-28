@@ -134,7 +134,7 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
 
   let numPatFound = 0;
   //sort through all_items, if an item has a pattern value that is desired, add it to an array of only items with the patterns
-  let include_pattern = all_items.filter(function (item){
+  let include_pattern = result.filter(function (item){
     let isFound = false;
     for(let i=0;i<desiredPatterns.length;i++){
       if(item.pattern_seed == desiredPatterns[i].toString()){ //if a desired pattern is found, set isFound to true in order to add it to array
@@ -148,8 +148,9 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
   });
 
   
-
+  console.log("All Scraped Items: ");
   console.log(result);
+  console.log("Items that include pattern: ");
   console.log(include_pattern);
   console.log("total listings: " + total_listings + "\ntotal pages: " + total_pages);
   console.log("items scraped: " + num_scraped);
