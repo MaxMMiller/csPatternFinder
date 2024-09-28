@@ -20,7 +20,7 @@ function Item(item_name, item_wear, float, pattern_seed, buy_link, price){
 
 (async () => {
   //location of CS Float Extension
-  const pathToExtension = '/Users/maxwellmegale/Library/Application Support/Google/Chrome/Profile 1/Extensions/jjicbefpemnphinccgikpdaagjebbnhg/4.3.1_0';
+  const pathToExtension = '/Users/[userName]/Library/Application Support/Google/Chrome/Profile 1/Extensions/jjicbefpemnphinccgikpdaagjebbnhg/4.3.1_0';
   const userDataDir = '/tmp';
   const browserContext = await chromium.launchPersistentContext(userDataDir, {
     headless: false,
